@@ -1,6 +1,6 @@
 // Thin wrapper around SerpAPI's Google Search endpoint for the Live OSINT
 // tab. Docs: https://serpapi.com/search-api
-// Server-only: reads SERPAPI_KEY, never call this from the client.
+// Server-only: reads SerpAPI_Key (falls back to SERPAPI_KEY), never call this from the client.
 //
 // The query is passed straight through as Google's `q` parameter, so
 // standard Google search operators (site:, filetype:, intext:, inurl:,
@@ -20,10 +20,10 @@ export interface SerpResult {
 }
 
 export async function runSerpApiSearch(query: string): Promise<SerpResult> {
-    const apiKey = process.env.SERPAPI_KEY;
+    const apiKey = process.env.SerpAPI_Key || process.env.SERPAPI_KEY;
     if (!apiKey) {
           throw new Error(
-                  "SERPAPI_KEY is not set. Add it to your environment (see .env.local.example) to enable Live OSINT search."
+                  "SerpAPI_Key is not set. Add it to your environment (see .env.local.example) to enable Live OSINT search."
                 );
     }
 
