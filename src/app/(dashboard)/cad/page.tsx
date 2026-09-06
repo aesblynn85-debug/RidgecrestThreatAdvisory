@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/page-header";
 import { timeAgo } from "@/lib/format";
 import { CadImportForm } from "./cad-import-form";
+import { CadSyncButton } from "./cad-sync-button";
 import { CadTable } from "./cad-table";
 
 export const dynamic = "force-dynamic";
@@ -31,6 +32,7 @@ export default async function CadIntelligencePage() {
                 Last sync {timeAgo(settings.last_cad_sync_at)}
               </span>
             )}
+            <CadSyncButton />
             <CadImportForm cases={cases ?? []} />
           </div>
         }
