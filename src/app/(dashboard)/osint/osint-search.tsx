@@ -53,7 +53,7 @@ export function OsintSearch({
           </button>
         </div>
         <p className="mt-2 text-xs text-slate-500">
-          Searches run server-side via Perplexity Sonar. Results are public-source leads, not verified facts.
+          Searches run server-side via SerpAPI (Google Search). Results are public-source leads, not verified facts.
         </p>
       </div>
 
