@@ -7,7 +7,7 @@ import { AssessmentTabs } from "./assessment-tabs";
 
 export const dynamic = "force-dynamic";
 
-const orgName = process.env.NEXT_PUBLIC_ORG_NAME || "Ridgecrest Intelligence";
+const orgName = process.env.NEXT_PUBLIC_ORG_NAME || "R.A.V.E.N. Intelligence";
 
 export default async function AssessmentDetailPage({
   params,
