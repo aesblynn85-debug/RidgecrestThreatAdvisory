@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 const h = createElement;
-const orgName = process.env.NEXT_PUBLIC_ORG_NAME || "Ridgecrest Intelligence";
+const orgName = process.env.NEXT_PUBLIC_ORG_NAME || "R.A.V.E.N. Intelligence";
 
 /**
  * Destination for Supabase invite / magic-link / password-recovery emails.
