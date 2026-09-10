@@ -42,7 +42,7 @@ export function Sidebar({
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent/10 text-accent">
           <SecurityIcon className="h-4 w-4" />
         </div>
-        <div className="leading-tight">
+        <div className="leading-tight" title="Respond, Assess, Verify, Engage, Negate">
           <p className="text-[13px] font-bold uppercase tracking-wide text-white">
             {orgName.split(" ")[0]}
           </p>
