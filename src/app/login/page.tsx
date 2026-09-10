@@ -3,7 +3,7 @@
 import { useFormState, useFormStatus } from "react-dom";
 import { login, type LoginState } from "./actions";
 
-const orgName = process.env.NEXT_PUBLIC_ORG_NAME || "Ridgecrest Intelligence";
+const orgName = process.env.NEXT_PUBLIC_ORG_NAME || "R.A.V.E.N. Intelligence";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -26,7 +26,10 @@ export default function LoginPage() {
             <ShieldIcon />
           </div>
           <p className="kicker">{orgName}</p>
-          <h1 className="mt-1 text-xl font-semibold text-white">
+          <p className="mt-1 text-[11px] uppercase tracking-widest text-slate-500">
+            Respond &middot; Assess &middot; Verify &middot; Engage &middot; Negate
+          </p>
+          <h1 className="mt-2 text-xl font-semibold text-white">
             Owner sign-in
           </h1>
           <p className="mt-1 text-sm text-slate-400">
