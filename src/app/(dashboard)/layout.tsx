@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Sidebar } from "@/components/sidebar";
 
-const orgName = process.env.NEXT_PUBLIC_ORG_NAME || "Ridgecrest Intelligence";
+const orgName = process.env.NEXT_PUBLIC_ORG_NAME || "R.A.V.E.N. Intelligence";
 
 export default async function DashboardLayout({
   children,
