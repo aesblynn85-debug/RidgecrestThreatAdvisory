@@ -1,4 +1,6 @@
-# Ridgecrest Intelligence — OSINT Case Platform
+# R.A.V.E.N. Intelligence — OSINT Case Platform
+
+**R.A.V.E.N.** — Respond, Assess, Verify, Engage, Negate.
 
 A self-hosted, single-owner OSINT case management app: open a case, pull CAD
 records and live open-source leads into it, track entities and their
