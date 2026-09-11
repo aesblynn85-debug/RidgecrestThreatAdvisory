@@ -1,11 +1,22 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { SearchIcon } from "@/components/icons";
 import { formatDateTime } from "@/lib/format";
-import type { CadRecordRow } from "@/lib/supabase/types";
+import type { CadRecordRow, CaseRow } from "@/lib/supabase/types";
+import { assignCadRecordToCase } from "@/lib/actions/cad";
 
-export function CadTable({ records }: { records: CadRecordRow[] }) {
+export function CadTable({
+  records,
+  cases,
+}: {
+  records: CadRecordRow[];
+  cases: CaseRow[];
+}) {
+  const router = useRouter();
+  const [, startTransition] = useTransition();
+  const [pendingId, setPendingId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [type, setType] = useState("all");
 
@@ -30,6 +41,19 @@ export function CadTable({ records }: { records: CadRecordRow[] }) {
       return haystack.includes(q);
     });
   }, [records, query, type]);
+
+  function caseTitle(caseId: string) {
+    return cases.find((c) => c.id === caseId)?.title ?? "Unknown case";
+  }
+
+  function handleAssign(recordId: string, caseId: string) {
+    setPendingId(recordId);
+    startTransition(async () => {
+      await assignCadRecordToCase(recordId, caseId || null);
+      router.refresh();
+      setPendingId(null);
+    });
+  }
 
   return (
     <div>
@@ -64,13 +88,14 @@ export function CadTable({ records }: { records: CadRecordRow[] }) {
         </p>
       ) : (
         <div className="card overflow-x-auto p-0">
-          <table className="w-full min-w-[720px] text-left text-sm">
+          <table className="w-full min-w-[860px] text-left text-sm">
             <thead>
               <tr className="border-b border-base-700 text-xs uppercase tracking-wide text-slate-500">
                 <th className="px-4 py-3 font-medium">Time</th>
                 <th className="px-4 py-3 font-medium">Record</th>
                 <th className="px-4 py-3 font-medium">Type</th>
                 <th className="px-4 py-3 font-medium">Detail</th>
+                <th className="px-4 py-3 font-medium">Case</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-base-700">
@@ -91,6 +116,41 @@ export function CadTable({ records }: { records: CadRecordRow[] }) {
                     {r.narrative || "—"}
                     {r.location && (
                       <span className="ml-2 text-xs text-slate-500">@ {r.location}</span>
+                    )}
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3">
+                    {r.case_id ? (
+                      <div className="flex items-center gap-2">
+                        <span className="badge border border-accent/40 bg-accent/10 text-accent">
+                          {caseTitle(r.case_id)}
+                        </span>
+                        <button
+                          type="button"
+                          disabled={pendingId === r.id}
+                          onClick={() => handleAssign(r.id, "")}
+                          className="text-xs text-slate-500 hover:text-danger disabled:opacity-50"
+                        >
+                          Unlink
+                        </button>
+                      </div>
+                    ) : cases.length ? (
+                      <select
+                        className="input w-auto py-1 text-xs"
+                        value=""
+                        disabled={pendingId === r.id}
+                        onChange={(e) => {
+                          if (e.target.value) handleAssign(r.id, e.target.value);
+                        }}
+                      >
+                        <option value="">Link to case…</option>
+                        {cases.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.title}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <span className="text-xs text-slate-600">No cases yet</span>
                     )}
                   </td>
                 </tr>
