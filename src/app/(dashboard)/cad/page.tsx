@@ -38,7 +38,7 @@ export default async function CadIntelligencePage() {
         }
       />
 
-      <CadTable records={records ?? []} />
+      <CadTable records={records ?? []} cases={cases ?? []} />
     </div>
   );
 }
