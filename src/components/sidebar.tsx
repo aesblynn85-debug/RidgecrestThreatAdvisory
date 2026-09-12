@@ -10,6 +10,7 @@ import {
   EntitiesIcon,
   LinkAnalysisIcon,
   LogoutIcon,
+  MapIcon,
   OsintIcon,
   OverviewIcon,
   SecurityIcon,
@@ -19,6 +20,7 @@ import {
 const NAV = [
   { href: "/overview", label: "Overview", icon: OverviewIcon },
   { href: "/cad", label: "CAD Intelligence", icon: CadIcon },
+  { href: "/crime-map", label: "Crime Map", icon: MapIcon },
   { href: "/cases", label: "Cases", icon: CasesIcon },
   { href: "/entities", label: "Entities", icon: EntitiesIcon },
   { href: "/osint", label: "Live OSINT", icon: OsintIcon },
