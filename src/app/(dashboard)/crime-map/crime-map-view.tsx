@@ -73,8 +73,8 @@ export function CrimeMapView({ incidents }: { incidents: CadRecordRow[] }) {
         </div>
         {error && <p className="mt-2 text-xs text-danger">{error}</p>}
         <p className="mt-2 text-xs text-slate-500">
-          Geocoded via OpenStreetMap Nominatim, then centered on Waze's live traffic map. Currently
-          showing {center.label}.
+          Geocoded via OpenStreetMap Nominatim, then centered on Waze&apos;s live traffic map.
+          Currently showing {center.label}.
         </p>
       </div>
 
