@@ -126,3 +126,11 @@ export const UploadIcon = (p: SVGProps<SVGSVGElement>) => (
     <path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" />
   </Base>
 );
+
+
+export const MapIcon = (props: SVGProps<SVGSVGElement>) => (
+    <Base {...props}>
+        <path d="M12 21s7-7.2 7-12.5A7 7 0 0 0 5 8.5C5 13.8 12 21 12 21z" />
+          <circle cx="12" cy="8.5" r="2.5" />
+    </Base>
+  );
