@@ -5,8 +5,8 @@ import { SearchIcon, MapIcon } from "@/components/icons";
 import { formatDateTime } from "@/lib/format";
 import type { CadRecordRow } from "@/lib/supabase/types";
 
-// Ridgecrest, CA — default center until an address is searched.
-const DEFAULT_CENTER = { lat: 35.6225, lon: -117.6709, label: "Ridgecrest, CA" };
+// Atlanta, GA — default center until an address is searched.
+const DEFAULT_CENTER = { lat: 33.7490, lon: -84.3880, label: "Atlanta, GA" };
 
 type Center = { lat: number; lon: number; label: string };
 
