@@ -1,0 +1,6 @@
+# Python dependency for scripts/ddg_search.py -- the DuckDuckGo fallback
+# search engine for the Live OSINT tab (used when SEARXNG_URL is unset or a
+# SearXNG request fails). Not needed at all if you only rely on SearXNG.
+#
+# Install with: pip install -r requirements.txt
+duckduckgo-search>=6.0
