@@ -134,3 +134,20 @@ export const MapIcon = (props: SVGProps<SVGSVGElement>) => (
           <circle cx="12" cy="8.5" r="2.5" />
     </Base>
   );
+
+
+export const AlertIcon = (p: SVGProps<SVGSVGElement>) => (
+    <Base {...p}>
+        <path d="M12 3L20 18H4L12 3Z" />
+        <path d="M12 10V14" />
+        <circle cx="12" cy="17" r="0.75" fill="currentColor" stroke="none" />
+      </Base>
+  );
+
+export const FeedIcon = (p: SVGProps<SVGSVGElement>) => (
+    <Base {...p}>
+        <path d="M4 4V7C11.18 7 17 12.82 17 20H20C20 11.28 12.72 4 4 4Z" />
+        <path d="M4 10V13A7 7 0 0 1 11 20H14A10 10 0 0 0 4 10Z" />
+        <circle cx="5.5" cy="18.5" r="1.75" fill="currentColor" stroke="none" />
+      </Base>
+  );
