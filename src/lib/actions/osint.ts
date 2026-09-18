@@ -1,35 +1,59 @@
 "use server";
 
-  import { revalidatePath } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { runSerpApiSearch, type SerpCitation } from "@/lib/serpapi";
+import { runSearxngSearch } from "@/lib/searxng";
+import { runDuckDuckGoSearch } from "@/lib/duckduckgo";
+import type { OsintCitation } from "@/lib/supabase/types";
 import { logAction } from "./audit";
 
 export interface OsintSearchState {
     error?: string;
     answer?: string;
-    citations?: SerpCitation[];
+    citations?: OsintCitation[];
     query?: string;
+    engine?: string;
 }
 
 export async function searchOsint(query: string): Promise<OsintSearchState> {
     const trimmed = query.trim();
     if (!trimmed) return { error: "Enter a search lead first." };
 
+  // SearXNG is the primary engine (self-hosted, no per-query cost or key).
+  // If it's not configured or the request fails, fall back to the
+  // DuckDuckGo Python library (src/lib/duckduckgo.ts) before giving up.
   try {
-        const result = await runSerpApiSearch(trimmed);
-        return { answer: result.answer, citations: result.citations, query: trimmed };
-  } catch (err) {
-        return { error: err instanceof Error ? err.message : "Search failed." };
+        const result = await runSearxngSearch(trimmed);
+        return {
+                answer: result.answer,
+                citations: result.citations,
+                query: trimmed,
+                engine: result.model,
+        };
+  } catch (searxError) {
+        try {
+                const result = await runDuckDuckGoSearch(trimmed);
+                return {
+                          answer: result.answer,
+                          citations: result.citations,
+                          query: trimmed,
+                          engine: result.model,
+                };
+        } catch (ddgError) {
+                const searxMsg = searxError instanceof Error ? searxError.message : "SearXNG failed.";
+                const ddgMsg = ddgError instanceof Error ? ddgError.message : "DuckDuckGo failed.";
+                return { error: `SearXNG: ${searxMsg} | DuckDuckGo: ${ddgMsg}` };
+        }
   }
 }
 
 export async function saveOsintResult(input: {
     query: string;
     answer: string;
-    citations: SerpCitation[];
+    citations: OsintCitation[];
     case_id?: string | null;
     entity_id?: string | null;
+    engine?: string;
 }) {
     const supabase = createClient();
     const {
@@ -42,7 +66,7 @@ export async function saveOsintResult(input: {
         citations: input.citations,
         case_id: input.case_id || null,
         entity_id: input.entity_id || null,
-        model: "serpapi",
+        model: input.engine || "searxng",
         created_by: user?.id ?? null,
   });
 
