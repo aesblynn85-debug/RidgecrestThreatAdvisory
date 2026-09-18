@@ -53,7 +53,7 @@ export function OsintSearch({
           </button>
         </div>
         <p className="mt-2 text-xs text-slate-500">
-          Searches run server-side via SerpAPI (Google Search). Results are public-source leads, not verified facts.
+          Searches run server-side via a self-hosted SearXNG instance, falling back to DuckDuckGo (via the Python duckduckgo-search library) if SearXNG is unset or unavailable. Results are public-source leads, not verified facts.
         </p>
       </div>
 
@@ -65,7 +65,7 @@ export function OsintSearch({
 
       {result?.answer && (
         <div className="card mt-4">
-          <p className="kicker">Result for “{result.query}”</p>
+          <p className="kicker">Result for “{result.query}”{result.engine ? ` · via ${result.engine}` : ""}</p>
           <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-100">
             {result.answer}
           </p>
@@ -128,6 +128,7 @@ export function OsintSearch({
                   citations: result.citations || [],
                   case_id: caseId || null,
                   entity_id: entityId || null,
+                  engine: result.engine,
                 });
                 setSaveState(res?.error ? "error" : "saved");
               }}
