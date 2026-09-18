@@ -4,10 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
+    AlertIcon,
   AssessmentsIcon,
   CadIcon,
   CasesIcon,
   EntitiesIcon,
+    FeedIcon,
   LinkAnalysisIcon,
   LogoutIcon,
   MapIcon,
@@ -27,6 +29,8 @@ const NAV = [
   { href: "/links", label: "Link Analysis", icon: LinkAnalysisIcon },
   { href: "/timeline", label: "Timeline", icon: TimelineIcon },
   { href: "/assessments", label: "Assessments", icon: AssessmentsIcon },
+  { href: "/tcap", label: "TCAP Alerts", icon: AlertIcon },
+  { href: "/threat-feeds", label: "OpenCTI/MISP Feeds", icon: FeedIcon },
   { href: "/security", label: "Security & Sync", icon: SecurityIcon },
 ];
 
