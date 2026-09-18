@@ -8,14 +8,13 @@ relationships, build a unified timeline, and write a client-ready threat
 assessment. Built as a plain Next.js + Supabase app you own end-to-end —
 no third-party sandbox in the loop.
 
-Sections: **Overview · CAD Intelligence · Cases · Entities · Live OSINT ·
-Link Analysis · Timeline · Assessments · Security & Sync.**
+Sections: **Overview · CAD Intelligence · Cases · Entities · Live OSINT · Link Analysis · Timeline · Assessments · TCAP Alerts · OpenCTI/MISP Feeds · Security & Sync.**
 
 ## Stack
 
 - **Next.js 14** (App Router, Server Actions, TypeScript, Tailwind CSS)
 - **Supabase** — Postgres, Auth (single owner, email/password), Row Level Security
-- **SerpAPI** — Google Search results for the Live OSINT tab (no Perplexity dependency)
+- **SearXNG** (self-hosted) — primary Live OSINT search engine via its JSON API, with a **DuckDuckGo** fallback (Python `duckduckgo-search` library, via `scripts/ddg_search.py`) if SearXNG is unset or a search fails
 - **RidgecrestCAD sync** — reads calls/dispatches, field reports, and guard notes
   directly from the RidgecrestCAD Supabase project and mirrors them into `cad_records`
 - **Vercel** — hosting
@@ -26,12 +25,7 @@ parsing are hand-rolled so there's nothing extra to audit or version-pin.
 ## 1. Create the Supabase project
 
 1. Create a project at [supabase.com](https://supabase.com).
-2. Open **SQL Editor** and run, in order, the contents of
-[`supabase/migrations/0001_init.sql`](./supabase/migrations/0001_init.sql)
-and [`supabase/migrations/0002_cad_sync_source.sql`](./supabase/migrations/0002_cad_sync_source.sql)
-once each. Together they create every table, the `case_timeline` view, RLS
-policies, a starter `org_settings` row, and allow `cad_sync` as a CAD
-record source.
+2. Open **SQL Editor** and run, in order, the contents of [`supabase/migrations/0001_init.sql`](./supabase/migrations/0001_init.sql), [`supabase/migrations/0002_cad_sync_source.sql`](./supabase/migrations/0002_cad_sync_source.sql), and [`supabase/migrations/0003_tcap_and_threat_feeds.sql`](./supabase/migrations/0003_tcap_and_threat_feeds.sql) once each. Together they create every table (including `tcap_alerts` and `threat_feed_indicators`), the `case_timeline` view, RLS policies, a starter `org_settings` row, and allow `cad_sync` as a CAD record source.
 3. Go to **Authentication → Users → Add user** and create your own owner
 account (email + password). There is no public sign-up screen —
 this app assumes exactly one account.
@@ -41,15 +35,14 @@ this app assumes exactly one account.
 - `service_role` key → `SUPABASE_SERVICE_ROLE_KEY` (server-only, never
 exposed to the browser — used solely by the CAD webhook route)
 
-## 2. Get a SerpAPI key
+## 2. Set up SearXNG (and optionally the DuckDuckGo Python fallback)
 
-Live OSINT search calls SerpAPI's Google Search endpoint server-side —
-Perplexity is no longer used anywhere in this app.
+Live OSINT search calls a self-hosted SearXNG instance's JSON API server-side, with an automatic fallback to the DuckDuckGo Python library if SearXNG is unset or a search fails.
 
-1. Create a key at [serpapi.com](https://serpapi.com/).
-2. Set it as `SERPAPI_KEY`. Until this is set, every other page works
-normally — only the Live OSINT search will show a clear error telling you
-the key is missing.
+1. Stand up a SearXNG instance (`docker run` or `docker compose` from [github.com/searxng/searxng](https://github.com/searxng/searxng) is the fastest path) and enable JSON output by adding `- json` under `search: formats:` in its `settings.yml`. Most public instances disable JSON output to deter scraping, so this generally means an instance you run yourself.
+2. Set it as `SEARXNG_URL` (e.g. `http://localhost:8080`). Until this is set, every other page works normally — only the Live OSINT search will fall through to the DuckDuckGo fallback (or show a clear error if that's unavailable too).
+   3. Optional but recommended: install the Python fallback so a SearXNG outage doesn't take Live OSINT down entirely. Requires Python 3 and `pip install -r requirements.txt` (installs `duckduckgo-search`, used by `scripts/ddg_search.py`). Set `PYTHON_BIN` if `python3` isn't the right interpreter name on your host.
+      4. Note: the DuckDuckGo fallback shells out to a real Python process, so it only works on a host that lets you spawn one (a VM, Docker container, Fly.io, Render, Railway, etc.). It will not work on Vercel's default serverless functions — if you deploy there, either rely on SearXNG only or self-host on a platform with a real long-lived process.
 
 ## 3. Configure environment variables
 
@@ -62,7 +55,8 @@ production:
 | `NEXT_PUBLIC_SUPABASE_URL` | everywhere |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | everywhere |
 | `SUPABASE_SERVICE_ROLE_KEY` | `/api/cad/webhook` only (server-only) |
-| `SERPAPI_KEY` | Live OSINT search (server-only) |
+| `SEARXNG_URL` | Live OSINT search — primary engine (server-only) |
+| `PYTHON_BIN` | Live OSINT search — DuckDuckGo fallback interpreter, optional (server-only) |
 | `CAD_WEBHOOK_SECRET` | `/api/cad/webhook` auth (server-only) |
 | `CAD_SUPABASE_URL` | CAD sync — RidgecrestCAD's own Supabase project URL (server-only) |
 | `CAD_SUPABASE_ANON_KEY` | CAD sync — RidgecrestCAD's own Supabase anon key (server-only) |
@@ -123,10 +117,7 @@ record updates it instead of duplicating it.
 
 ### Live OSINT
 
-Search a lead on the OSINT tab (server-side call to SerpAPI's Google Search
-endpoint), review the answer and its sources, then optionally attach it to a
-case and/or an entity so it shows up in that case's timeline and that
-entity's profile.
+Search a lead on the OSINT tab (server-side call to a self-hosted SearXNG instance's JSON API, falling back to the DuckDuckGo Python library if SearXNG is unset or fails), review the answer and its sources, then optionally attach it to a case and/or an entity so it shows up in that case's timeline and that entity's profile.
 
 ### Entities, links, timeline, assessments
 
@@ -171,3 +162,6 @@ force-directed layout if a case graph gets large.
 - No file/evidence upload yet (e.g. screenshots as case evidence) — add a
 Supabase Storage bucket + an `evidence` table following the same pattern
 as `cad_records`/`osint_results` if you need that.
+- The DuckDuckGo fallback search (`scripts/ddg_search.py`) shells out to a real Python process, so it only works on a host that lets you spawn one. It will not work on Vercel's default serverless functions — either rely on SearXNG only there, or self-host this app on a platform with a real long-lived process (a VM, Docker container, Fly.io, Render, Railway, etc.) if you need the fallback too.
+- TCAP Alerts and OpenCTI/MISP Feeds are analyst-maintained logs, not live pulls — this app has no TCAP API integration (membership is vetted) and no OpenCTI GraphQL/MISP REST client yet. Log what you receive from those platforms manually for now; wiring up real feed ingestion is a natural next step once you've stood up your own OpenCTI/MISP instance and have credentials to test against.
+  - Run `supabase/migrations/0003_tcap_and_threat_feeds.sql` (after 0001 and 0002) to create the `tcap_alerts` and `threat_feed_indicators` tables backing those two new sections.
