@@ -53,7 +53,7 @@ export function OsintSearch({
           </button>
         </div>
         <p className="mt-2 text-xs text-slate-500">
-          Searches run server-side via a self-hosted SearXNG instance, falling back to DuckDuckGo (via the Python duckduckgo-search library) if SearXNG is unset or unavailable. Results are public-source leads, not verified facts.
+          Searches run server-side via a self-hosted SearXNG instance. Results are public-source leads, not verified facts.
         </p>
       </div>
 
