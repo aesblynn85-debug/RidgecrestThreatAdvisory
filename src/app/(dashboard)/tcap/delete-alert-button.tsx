@@ -22,4 +22,3 @@ export function DeleteAlertButton({ id }: { id: string }) {
         </button>
     );
 }
-</button>
